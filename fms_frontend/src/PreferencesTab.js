@@ -5,6 +5,7 @@ function PreferencesTab({ userData }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [preferences, setPreferences] = useState({
+        faculty_logo_file_id: null,
         facility_logo_file_id: null,
         user_image_file_id: null,
         theme: 'light',
@@ -15,6 +16,7 @@ function PreferencesTab({ userData }) {
     });
 
     // Image handling states
+    const [facultyLogo, setFacultyLogo] = useState('');
     const [facilityLogo, setFacilityLogo] = useState('');
     const [userImage, setUserImage] = useState('');
     const [userFiles, setUserFiles] = useState([]);
@@ -52,6 +54,7 @@ function PreferencesTab({ userData }) {
             const prefs = response.data;
 
             setPreferences({
+                faculty_logo_file_id: prefs.faculty_logo_file_id,
                 facility_logo_file_id: prefs.facility_logo_file_id,
                 user_image_file_id: prefs.user_image_file_id,
                 theme: prefs.theme || 'light',
@@ -62,6 +65,11 @@ function PreferencesTab({ userData }) {
             });
 
             // Set image paths for display
+            if (prefs.faculty_logo_path) {
+                setFacultyLogo(prefs.faculty_logo_path);
+                localStorage.setItem('facultyLogo', prefs.faculty_logo_path);
+            }
+            
             if (prefs.facility_logo_path) {
                 setFacilityLogo(prefs.facility_logo_path);
                 localStorage.setItem('facilityLogo', prefs.facility_logo_path);
@@ -81,7 +89,11 @@ function PreferencesTab({ userData }) {
         if (selectedFile) {
             const updatedPreferences = { ...preferences };
 
-            if (type === 'facility') {
+            if (type === 'faculty') {
+                updatedPreferences.faculty_logo_file_id = parseInt(fileId);
+                setFacultyLogo(selectedFile.file_path);
+                localStorage.setItem('facultyLogo', selectedFile.file_path);
+            } else if (type === 'facility') {
                 updatedPreferences.facility_logo_file_id = parseInt(fileId);
                 setFacilityLogo(selectedFile.file_path);
                 localStorage.setItem('facilityLogo', selectedFile.file_path);
@@ -104,7 +116,11 @@ function PreferencesTab({ userData }) {
     const handleRemoveImage = async (type) => {
         const updatedPreferences = { ...preferences };
 
-        if (type === 'facility') {
+        if (type === 'faculty') {
+            updatedPreferences.faculty_logo_file_id = null;
+            setFacultyLogo('');
+            localStorage.removeItem('facultyLogo');
+        } else if (type === 'facility') {
             updatedPreferences.facility_logo_file_id = null;
             setFacilityLogo('');
             localStorage.removeItem('facilityLogo');
@@ -171,6 +187,84 @@ function PreferencesTab({ userData }) {
             {error && <div style={{ color: 'red', marginBottom: '15px' }}>{error}</div>}
 
             <div style={{ maxWidth: '600px' }}>
+                {/* Faculty Logo Upload */}
+                <div style={{ marginBottom: '30px', padding: '20px', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
+                    <h4 style={{ marginTop: 0, marginBottom: '15px' }}>Faculty Logo</h4>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '15px' }}>
+                        {facultyLogo ? (
+                            <img
+                                src={facultyLogo}
+                                alt="Faculty Logo Preview"
+                                style={{
+                                    height: '60px',
+                                    width: 'auto',
+                                    maxWidth: '150px',
+                                    objectFit: 'contain',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '4px'
+                                }}
+                            />
+                        ) : (
+                            <div style={{
+                                height: '60px',
+                                width: '60px',
+                                backgroundColor: '#007bff',
+                                borderRadius: '8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'white',
+                                fontSize: '16px',
+                                fontWeight: 'bold'
+                            }}>
+                                FMS
+                            </div>
+                        )}
+                        <div>
+                            <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>
+                                Select a logo from your uploaded files
+                            </p>
+                            <small style={{ color: '#888' }}>Choose from files you've uploaded to the system</small>
+                        </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                        <select
+                            value={preferences.faculty_logo_file_id || ''}
+                            onChange={(e) => handleFileSelection('faculty', e.target.value)}
+                            style={{
+                                padding: '8px 12px',
+                                border: '1px solid #ccc',
+                                borderRadius: '4px',
+                                backgroundColor: 'white',
+                                fontSize: '14px',
+                                minWidth: '200px'
+                            }}
+                        >
+                            <option value="">Select a file...</option>
+                            {userFiles.map(file => (
+                                <option key={file.id} value={file.id}>
+                                    {file.original_name}
+                                </option>
+                            ))}
+                        </select>
+                        {facultyLogo && (
+                            <button
+                                onClick={() => handleRemoveImage('faculty')}
+                                style={{
+                                    padding: '8px 16px',
+                                    backgroundColor: '#dc3545',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Remove
+                            </button>
+                        )}
+                    </div>
+                </div>
+
                 {/* Facility Logo Upload */}
                 <div style={{ marginBottom: '30px', padding: '20px', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
                     <h4 style={{ marginTop: 0, marginBottom: '15px' }}>Facility Logo</h4>

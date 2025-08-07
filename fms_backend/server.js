@@ -13,6 +13,67 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Add middleware to handle BigInt serialization globally
+app.use((req, res, next) => {
+    const originalJson = res.json;
+    res.json = function(body) {
+        try {
+            // Custom replacer function to handle BigInt values
+            const replacer = (key, value) => {
+                if (typeof value === 'bigint') {
+                    return value.toString();
+                }
+                return value;
+            };
+            
+            // First stringify with our custom replacer
+            const jsonString = JSON.stringify(body, replacer);
+            
+            // Then parse and send
+            return originalJson.call(this, JSON.parse(jsonString));
+        } catch (err) {
+            console.error('Error serializing response:', err);
+            
+            // If the error is about BigInt serialization, try a more direct approach
+            if (err.message && err.message.includes('BigInt')) {
+                try {
+                    // Convert all BigInt values in the object recursively
+                    const convertBigInts = (obj) => {
+                        if (obj === null || obj === undefined) return obj;
+                        
+                        if (typeof obj === 'bigint') {
+                            return obj.toString();
+                        }
+                        
+                        if (Array.isArray(obj)) {
+                            return obj.map(item => convertBigInts(item));
+                        }
+                        
+                        if (typeof obj === 'object') {
+                            const newObj = {};
+                            for (const key in obj) {
+                                newObj[key] = convertBigInts(obj[key]);
+                            }
+                            return newObj;
+                        }
+                        
+                        return obj;
+                    };
+                    
+                    const convertedBody = convertBigInts(body);
+                    return originalJson.call(this, convertedBody);
+                } catch (deepErr) {
+                    console.error('Error in deep BigInt conversion:', deepErr);
+                }
+            }
+            
+            // Last resort: fall back to original method
+            return originalJson.call(this, body);
+        }
+    };
+    next();
+});
+
 const pool = mariadb.createPool({
     host: process.env.DB_HOST || '127.0.0.1',
     user: process.env.DB_USER,
@@ -24,7 +85,7 @@ const pool = mariadb.createPool({
 // Multer configuration for file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const uploadDir = path.join(__dirname, 'uploads');
+        const uploadDir = path.join(__dirname, 'fms-uploads');
         cb(null, uploadDir);
     },
     filename: (req, file, cb) => {
@@ -48,7 +109,7 @@ const upload = multer({
 });
 
 // Create uploads directory on server startup
-const uploadsDir = path.join(__dirname, 'uploads');
+const uploadsDir = path.join(__dirname, 'fms-uploads');
 fs.promises.mkdir(uploadsDir, { recursive: true })
     .then(() => {
         console.log('Uploads directory created/verified:', uploadsDir);
@@ -58,7 +119,7 @@ fs.promises.mkdir(uploadsDir, { recursive: true })
     });
 
 // Serve uploaded files statically
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/fms-uploads', express.static(path.join(__dirname, 'fms-uploads')));
 
 // Email configuration
 const transporter = nodemailer.createTransport({
@@ -1846,29 +1907,20 @@ app.delete('/fms-api/groups/:groupId/users/:userId', authenticateToken, checkRol
 
 // File Upload Management Endpoints
 
-// Test endpoint to verify file upload routes are working
-app.get('/fms-api/file-uploads-test', authenticateToken, async (req, res) => {
-    res.json({ message: 'File upload routes are working', timestamp: new Date().toISOString() });
-});
-
 // Get all file uploads
 app.get('/fms-api/file-uploads', authenticateToken, async (req, res) => {
-    console.log('DEBUG: GET /fms-api/file-uploads endpoint hit');
     let conn;
     try {
-        console.log('DEBUG: Attempting to get database connection');
         conn = await pool.getConnection();
-        console.log('DEBUG: Database connection obtained');
 
         const fileUploads = await conn.query(`
             SELECT fu.*, f.short_name as facility_name, u.first_name, u.last_name, u.username
             FROM file_uploads fu
             LEFT JOIN facilities f ON fu.facility_id = f.id
             LEFT JOIN users u ON fu.uploaded_by = u.id
-            WHERE fu.is_active = TRUE
+            WHERE fu.is_active = TRUE OR fu.is_active IS NULL
             ORDER BY fu.upload_timestamp DESC
         `);
-        console.log('DEBUG: Query executed, found', fileUploads.length, 'file uploads');
 
         // Convert BigInt values to regular numbers for JSON serialization
         const serializedFileUploads = fileUploads.map(upload => {
@@ -1878,15 +1930,13 @@ app.get('/fms-api/file-uploads', authenticateToken, async (req, res) => {
             }
             return serialized;
         });
-        console.log('DEBUG: File uploads serialized, sending response');
 
         res.json(serializedFileUploads);
     } catch (err) {
-        console.error('ERROR in GET /fms-api/file-uploads:', err);
-        res.status(500).json({ error: 'Failed to fetch file uploads' });
+        console.error('Error fetching file uploads:', err);
+        res.status(500).json({ error: 'Failed to fetch file uploads', details: err.message });
     } finally {
         if (conn) {
-            console.log('DEBUG: Releasing database connection');
             conn.release();
         }
     }
@@ -1906,7 +1956,15 @@ app.get('/fms-api/file-uploads/facility/:facilityId', authenticateToken, async (
             WHERE fu.facility_id = ? AND fu.is_active = TRUE
             ORDER BY fu.upload_timestamp DESC
         `, [facilityId]);
-        res.json(fileUploads);
+        res.json(fileUploads.map(row => {
+            // Convert each row to a new object with BigInt values converted to strings
+            return Object.fromEntries(
+                Object.entries(row).map(([key, value]) => [
+                    key, 
+                    typeof value === 'bigint' ? value.toString() : value
+                ])
+            );
+        }));
     } catch (err) {
         console.error('Error fetching facility file uploads:', err);
         res.status(500).json({ error: 'Failed to fetch facility file uploads' });
@@ -1934,7 +1992,7 @@ app.post('/fms-api/file-uploads', authenticateToken, upload.single('file'), asyn
         }
 
         const uploaded_by = req.user.id;
-        const file_path = `/uploads/${req.file.filename}`;
+        const file_path = `/fms-uploads/${req.file.filename}`;
 
         conn = await pool.getConnection();
         const result = await conn.query(`
@@ -1977,7 +2035,7 @@ app.post('/fms-api/file-uploads', authenticateToken, upload.single('file'), asyn
                 console.error('Error cleaning up file:', unlinkErr);
             }
         }
-        res.status(500).json({ error: 'Failed to upload file' });
+        res.status(500).json({ error: 'Failed to upload file', details: err.message });
     } finally {
         if (conn) conn.release();
     }
@@ -2025,11 +2083,19 @@ app.delete('/fms-api/file-uploads/:id', authenticateToken, async (req, res) => {
             return res.status(404).json({ error: 'File not found' });
         }
 
-        const filePath = path.join(__dirname, fileInfo[0].file_path);
+        // Handle the file path correctly - it's stored as /fms-uploads/filename but the actual path is in the local filesystem
+        let filePath;
+        if (fileInfo[0].file_path.startsWith('/fms-uploads/')) {
+            const fileName = fileInfo[0].file_path.replace('/fms-uploads/', '');
+            filePath = path.join(__dirname, 'fms-uploads', fileName);
+        } else {
+            filePath = path.join(__dirname, fileInfo[0].file_path);
+        }
 
         // Delete the physical file
         try {
             await fs.promises.unlink(filePath);
+            console.log('File deleted from disk:', filePath);
         } catch (fsErr) {
             console.warn('File not found on disk, continuing with database deletion:', fsErr.message);
         }
@@ -2058,11 +2124,14 @@ app.get('/fms-api/user-preferences', authenticateToken, async (req, res) => {
         const preferences = await conn.query(`
             SELECT
                 up.*,
+                faculty_file.file_path as faculty_logo_path,
+                faculty_file.original_name as faculty_logo_name,
                 facility_file.file_path as facility_logo_path,
                 facility_file.original_name as facility_logo_name,
                 user_file.file_path as user_image_path,
                 user_file.original_name as user_image_name
             FROM user_preferences up
+            LEFT JOIN file_uploads faculty_file ON up.faculty_logo_file_id = faculty_file.id
             LEFT JOIN file_uploads facility_file ON up.facility_logo_file_id = facility_file.id
             LEFT JOIN file_uploads user_file ON up.user_image_file_id = user_file.id
             WHERE up.user_id = ?
@@ -2072,8 +2141,10 @@ app.get('/fms-api/user-preferences', authenticateToken, async (req, res) => {
             // Return default preferences if none exist
             res.json({
                 user_id: req.user.id,
+                faculty_logo_file_id: null,
                 facility_logo_file_id: null,
                 user_image_file_id: null,
+                faculty_logo_path: null,
                 facility_logo_path: null,
                 user_image_path: null,
                 theme: 'light',
@@ -2098,6 +2169,7 @@ app.put('/fms-api/user-preferences', authenticateToken, async (req, res) => {
     let conn;
     try {
         const {
+            faculty_logo_file_id,
             facility_logo_file_id,
             user_image_file_id,
             theme,
@@ -2119,6 +2191,7 @@ app.put('/fms-api/user-preferences', authenticateToken, async (req, res) => {
             // Update existing preferences
             await conn.query(`
                 UPDATE user_preferences SET
+                    faculty_logo_file_id = ?,
                     facility_logo_file_id = ?,
                     user_image_file_id = ?,
                     theme = ?,
@@ -2129,6 +2202,7 @@ app.put('/fms-api/user-preferences', authenticateToken, async (req, res) => {
                     updated_at = CURRENT_TIMESTAMP
                 WHERE user_id = ?
             `, [
+                faculty_logo_file_id || null,
                 facility_logo_file_id || null,
                 user_image_file_id || null,
                 theme || 'light',
@@ -2143,6 +2217,7 @@ app.put('/fms-api/user-preferences', authenticateToken, async (req, res) => {
             await conn.query(`
                 INSERT INTO user_preferences (
                     user_id,
+                    faculty_logo_file_id,
                     facility_logo_file_id,
                     user_image_file_id,
                     theme,
@@ -2150,9 +2225,10 @@ app.put('/fms-api/user-preferences', authenticateToken, async (req, res) => {
                     notifications,
                     auto_save,
                     default_view
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             `, [
                 req.user.id,
+                faculty_logo_file_id || null,
                 facility_logo_file_id || null,
                 user_image_file_id || null,
                 theme || 'light',
@@ -2185,6 +2261,39 @@ app.put('/fms-api/user-preferences', authenticateToken, async (req, res) => {
         if (conn) conn.release();
     }
 });
+
+// Add faculty_logo_file_id column to user_preferences table if it doesn't exist
+(async () => {
+    let conn;
+    try {
+        conn = await pool.getConnection();
+        
+        // Check if the column exists
+        const columns = await conn.query(`
+            SHOW COLUMNS FROM user_preferences LIKE 'faculty_logo_file_id'
+        `);
+        
+        // If column doesn't exist, add it
+        if (columns.length === 0) {
+            console.log('Adding faculty_logo_file_id column to user_preferences table...');
+            await conn.query(`
+                ALTER TABLE user_preferences
+                ADD COLUMN faculty_logo_file_id INT NULL,
+                ADD CONSTRAINT fk_faculty_logo
+                FOREIGN KEY (faculty_logo_file_id)
+                REFERENCES file_uploads(id)
+                ON DELETE SET NULL
+            `);
+            console.log('Column added successfully.');
+        } else {
+            console.log('faculty_logo_file_id column already exists.');
+        }
+    } catch (err) {
+        console.error('Error checking/adding faculty_logo_file_id column:', err);
+    } finally {
+        if (conn) conn.release();
+    }
+})();
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

@@ -60,6 +60,11 @@ function FileUploadTab({ userData }) {
             setSelectedFiles([files[0]]);
             setUploadResults([]);
             setError('');
+
+            // Check if the file is an image, and if so, make sure it's properly handled
+            if (files[0].type.startsWith('image/')) {
+                console.log('Image file selected, ensuring proper handling');
+            }
         }
     };
 
@@ -174,10 +179,6 @@ function FileUploadTab({ userData }) {
     };
 
     const handleDeleteFile = async (fileId, fileName) => {
-        if (!window.confirm(`Are you sure you want to delete "${fileName}"? This action cannot be undone.`)) {
-            return;
-        }
-
         try {
             const config = {
                 headers: {
@@ -189,12 +190,8 @@ function FileUploadTab({ userData }) {
 
             // Refresh the file list
             fetchFileUploads();
-
-            // Show success message
-            alert('File deleted successfully');
         } catch (err) {
             console.error('Error deleting file:', err);
-            alert(err.response?.data?.error || 'Failed to delete file');
         }
     };
 
@@ -487,7 +484,11 @@ function FileUploadTab({ userData }) {
                                     fileUploads.map((upload, index) => (
                                         <tr key={upload.id} style={{ backgroundColor: index % 2 === 0 ? '#fff' : '#f9f9f9' }}>
                                             <td style={{ padding: '12px', borderBottom: '1px solid #eee' }}>
-                                                <div style={{ fontWeight: 'bold' }}>{upload.original_name}</div>
+                                                <div style={{ fontWeight: 'bold' }}>
+                                                    <a href={`/fms-uploads/${upload.file_name}`} target="_blank" rel="noopener noreferrer">
+                                                        {upload.original_name}
+                                                    </a>
+                                                </div>
                                                 {upload.description && (
                                                     <div style={{ fontSize: '12px', color: '#666' }}>{upload.description}</div>
                                                 )}

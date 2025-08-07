@@ -170,18 +170,20 @@ function Dashboard({ userData, onLogout }) {
                 borderBottom: '1px solid #ddd'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    {/* Facility Logo */}
-                    {localStorage.getItem('facilityLogo') ? (
+                    {/* Faculty Logo in top left */}
+                    {localStorage.getItem('facultyLogo') ? (
                         <img
-                            src={localStorage.getItem('facilityLogo')}
-                            alt="Facility Logo"
+                            src={localStorage.getItem('facultyLogo')}
+                            alt="Faculty Logo"
                             style={{
                                 height: '50px',
                                 width: 'auto',
                                 maxWidth: '120px',
-                                objectFit: 'contain'
+                                objectFit: 'contain',
+                                marginRight: '15px'
                             }}
                             onError={(e) => {
+                                console.error('Faculty logo failed to load');
                                 e.target.style.display = 'none';
                             }}
                         />
@@ -189,16 +191,17 @@ function Dashboard({ userData, onLogout }) {
                         <div style={{
                             height: '50px',
                             width: '50px',
-                            backgroundColor: '#007bff',
+                            backgroundColor: '#28a745',
                             borderRadius: '8px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             color: 'white',
-                            fontSize: '20px',
-                            fontWeight: 'bold'
+                            fontSize: '14px',
+                            fontWeight: 'bold',
+                            marginRight: '15px'
                         }}>
-                            FMS
+                            Faculty
                         </div>
                     )}
                     <h1>FMS Facilities Management System</h1>
@@ -230,6 +233,42 @@ function Dashboard({ userData, onLogout }) {
                     backgroundColor: '#f8f9fa'
                 }}>
                     <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                        {/* Facility Logo */}
+                        {localStorage.getItem('facilityLogo') ? (
+                            <img
+                                src={localStorage.getItem('facilityLogo')}
+                                alt="Facility Logo"
+                                style={{
+                                    height: '120px',
+                                    width: 'auto',
+                                    maxWidth: '200px',
+                                    objectFit: 'contain',
+                                    margin: '0 auto 15px',
+                                    display: 'block'
+                                }}
+                                onError={(e) => {
+                                    console.error('Facility logo failed to load');
+                                    e.target.style.display = 'none';
+                                }}
+                            />
+                        ) : (
+                            <div style={{
+                                height: '120px',
+                                width: '120px',
+                                backgroundColor: '#007bff',
+                                borderRadius: '12px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'white',
+                                fontSize: '24px',
+                                fontWeight: 'bold',
+                                margin: '0 auto 15px'
+                            }}>
+                                FMS
+                            </div>
+                        )}
+                        
                         {/* User Image */}
                         {localStorage.getItem('userImage') ? (
                             <img
@@ -244,6 +283,7 @@ function Dashboard({ userData, onLogout }) {
                                     border: '3px solid #007bff'
                                 }}
                                 onError={(e) => {
+                                    console.error('User image failed to load');
                                     // Fallback to initials if image fails to load
                                     e.target.style.display = 'none';
                                     e.target.nextSibling.style.display = 'flex';
@@ -483,49 +523,145 @@ function Dashboard({ userData, onLogout }) {
                             </div>
                         )}
 
-                        {!loading && !error && activeTab === 'setup' && (
+                        {!loading && !error && activeTab === 'compliance' && (
                             <div>
-                                <h2>Setup</h2>
+                                <h2>Compliance</h2>
                                 <div style={{ display: 'flex', borderBottom: '1px solid #dee2e6', marginBottom: '20px', backgroundColor: '#f8f9fa' }}>
                                     <div
-                                        onClick={() => setActiveSetupTab('preferences')}
+                                        onClick={() => setActiveComplianceTab('training')}
                                         style={{
                                             padding: '10px 20px',
                                             cursor: 'pointer',
-                                            backgroundColor: activeSetupTab === 'preferences' ? '#ffffff' : 'transparent',
-                                            borderBottom: activeSetupTab === 'preferences' ? '2px solid #007bff' : 'none',
-                                            fontWeight: activeSetupTab === 'preferences' ? 'bold' : 'normal',
-                                            border: activeSetupTab === 'preferences' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeSetupTab === 'preferences' ? 'none' : '1px solid #dee2e6'
+                                            backgroundColor: activeComplianceTab === 'training' ? '#ffffff' : 'transparent',
+                                            borderBottom: activeComplianceTab === 'training' ? '2px solid #007bff' : 'none',
+                                            fontWeight: activeComplianceTab === 'training' ? 'bold' : 'normal',
+                                            border: activeComplianceTab === 'training' ? '1px solid #dee2e6' : 'none'
                                         }}
                                     >
-                                        Preferences
+                                        Training
                                     </div>
                                     <div
-                                        onClick={() => setActiveSetupTab('file-upload')}
+                                        onClick={() => setActiveComplianceTab('risk-assessments')}
                                         style={{
                                             padding: '10px 20px',
                                             cursor: 'pointer',
-                                            backgroundColor: activeSetupTab === 'file-upload' ? '#ffffff' : 'transparent',
-                                            borderBottom: activeSetupTab === 'file-upload' ? '2px solid #007bff' : 'none',
-                                            fontWeight: activeSetupTab === 'file-upload' ? 'bold' : 'normal',
-                                            border: activeSetupTab === 'file-upload' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeSetupTab === 'file-upload' ? 'none' : '1px solid #dee2e6'
+                                            backgroundColor: activeComplianceTab === 'risk-assessments' ? '#ffffff' : 'transparent',
+                                            borderBottom: activeComplianceTab === 'risk-assessments' ? '2px solid #007bff' : 'none',
+                                            fontWeight: activeComplianceTab === 'risk-assessments' ? 'bold' : 'normal',
+                                            border: activeComplianceTab === 'risk-assessments' ? '1px solid #dee2e6' : 'none'
                                         }}
                                     >
-                                        File Upload
+                                        Risk Assessments
+                                    </div>
+                                    <div
+                                        onClick={() => setActiveComplianceTab('msds')}
+                                        style={{
+                                            padding: '10px 20px',
+                                            cursor: 'pointer',
+                                            backgroundColor: activeComplianceTab === 'msds' ? '#ffffff' : 'transparent',
+                                            borderBottom: activeComplianceTab === 'msds' ? '2px solid #007bff' : 'none',
+                                            fontWeight: activeComplianceTab === 'msds' ? 'bold' : 'normal',
+                                            border: activeComplianceTab === 'msds' ? '1px solid #dee2e6' : 'none'
+                                        }}
+                                    >
+                                        MSDS
+                                    </div>
+                                    <div
+                                        onClick={() => setActiveComplianceTab('incident-reports')}
+                                        style={{
+                                            padding: '10px 20px',
+                                            cursor: 'pointer',
+                                            backgroundColor: activeComplianceTab === 'incident-reports' ? '#ffffff' : 'transparent',
+                                            borderBottom: activeComplianceTab === 'incident-reports' ? '2px solid #007bff' : 'none',
+                                            fontWeight: activeComplianceTab === 'incident-reports' ? 'bold' : 'normal',
+                                            border: activeComplianceTab === 'incident-reports' ? '1px solid #dee2e6' : 'none'
+                                        }}
+                                    >
+                                        Incident Reports
+                                    </div>
+                                    <div
+                                        onClick={() => setActiveComplianceTab('safety-inspection')}
+                                        style={{
+                                            padding: '10px 20px',
+                                            cursor: 'pointer',
+                                            backgroundColor: activeComplianceTab === 'safety-inspection' ? '#ffffff' : 'transparent',
+                                            borderBottom: activeComplianceTab === 'safety-inspection' ? '2px solid #007bff' : 'none',
+                                            fontWeight: activeComplianceTab === 'safety-inspection' ? 'bold' : 'normal',
+                                            border: activeComplianceTab === 'safety-inspection' ? '1px solid #dee2e6' : 'none'
+                                        }}
+                                    >
+                                        Safety Inspection
+                                    </div>
+                                    <div
+                                        onClick={() => setActiveComplianceTab('emergency-procedures')}
+                                        style={{
+                                            padding: '10px 20px',
+                                            cursor: 'pointer',
+                                            backgroundColor: activeComplianceTab === 'emergency-procedures' ? '#ffffff' : 'transparent',
+                                            borderBottom: activeComplianceTab === 'emergency-procedures' ? '2px solid #007bff' : 'none',
+                                            fontWeight: activeComplianceTab === 'emergency-procedures' ? 'bold' : 'normal',
+                                            border: activeComplianceTab === 'emergency-procedures' ? '1px solid #dee2e6' : 'none'
+                                        }}
+                                    >
+                                        Emergency Procedures
+                                    </div>
+                                    <div
+                                        onClick={() => setActiveComplianceTab('local-rules')}
+                                        style={{
+                                            padding: '10px 20px',
+                                            cursor: 'pointer',
+                                            backgroundColor: activeComplianceTab === 'local-rules' ? '#ffffff' : 'transparent',
+                                            borderBottom: activeComplianceTab === 'local-rules' ? '2px solid #007bff' : 'none',
+                                            fontWeight: activeComplianceTab === 'local-rules' ? 'bold' : 'normal',
+                                            border: activeComplianceTab === 'local-rules' ? '1px solid #dee2e6' : 'none'
+                                        }}
+                                    >
+                                        Local Rules
+                                    </div>
+                                    <div
+                                        onClick={() => setActiveComplianceTab('waste-disposal')}
+                                        style={{
+                                            padding: '10px 20px',
+                                            cursor: 'pointer',
+                                            backgroundColor: activeComplianceTab === 'waste-disposal' ? '#ffffff' : 'transparent',
+                                            borderBottom: activeComplianceTab === 'waste-disposal' ? '2px solid #007bff' : 'none',
+                                            fontWeight: activeComplianceTab === 'waste-disposal' ? 'bold' : 'normal',
+                                            border: activeComplianceTab === 'waste-disposal' ? '1px solid #dee2e6' : 'none'
+                                        }}
+                                    >
+                                        Waste Disposal
                                     </div>
                                 </div>
                                 <div style={{ backgroundColor: '#ffffff', padding: '20px', border: '1px solid #dee2e6', borderRadius: '0 0 4px 4px' }}>
-                                    {activeSetupTab === 'preferences' && (
-                                        <PreferencesTab userData={userData} />
+                                    {activeComplianceTab === 'training' && (
+                                        <TrainingPage userData={userData} />
                                     )}
-                                    {activeSetupTab === 'file-upload' && (
-                                        <FileUploadTab userData={userData} />
+                                    {activeComplianceTab === 'risk-assessments' && (
+                                        <RiskAssessments userData={userData} />
+                                    )}
+                                    {activeComplianceTab === 'msds' && (
+                                        <MSDS userData={userData} />
+                                    )}
+                                    {activeComplianceTab === 'incident-reports' && (
+                                        <IncidentReports userData={userData} />
+                                    )}
+                                    {activeComplianceTab === 'safety-inspection' && (
+                                        <SafetyInspectionReports userData={userData} />
+                                    )}
+                                    {activeComplianceTab === 'emergency-procedures' && (
+                                        <EmergencyProcedures userData={userData} />
+                                    )}
+                                    {activeComplianceTab === 'local-rules' && (
+                                        <LocalRules userData={userData} />
+                                    )}
+                                    {activeComplianceTab === 'waste-disposal' && (
+                                        <WasteDisposalProcedures userData={userData} />
                                     )}
                                 </div>
                             </div>
-                        )}                        {!loading && !error && activeTab === 'research-operation' && (
+                        )}
+
+                        {!loading && !error && activeTab === 'research-operation' && (
                             <div>
                                 <h2>Research Operation</h2>
                                 <div style={{ display: 'flex', borderBottom: '1px solid #dee2e6', marginBottom: '20px', backgroundColor: '#f8f9fa' }}>
@@ -537,8 +673,7 @@ function Dashboard({ userData, onLogout }) {
                                             backgroundColor: activeResearchTab === 'projects' ? '#ffffff' : 'transparent',
                                             borderBottom: activeResearchTab === 'projects' ? '2px solid #007bff' : 'none',
                                             fontWeight: activeResearchTab === 'projects' ? 'bold' : 'normal',
-                                            border: activeResearchTab === 'projects' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeResearchTab === 'projects' ? 'none' : '1px solid #dee2e6'
+                                            border: activeResearchTab === 'projects' ? '1px solid #dee2e6' : 'none'
                                         }}
                                     >
                                         Projects
@@ -551,19 +686,50 @@ function Dashboard({ userData, onLogout }) {
                                             backgroundColor: activeResearchTab === 'shipments' ? '#ffffff' : 'transparent',
                                             borderBottom: activeResearchTab === 'shipments' ? '2px solid #007bff' : 'none',
                                             fontWeight: activeResearchTab === 'shipments' ? 'bold' : 'normal',
-                                            border: activeResearchTab === 'shipments' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeResearchTab === 'shipments' ? 'none' : '1px solid #dee2e6'
+                                            border: activeResearchTab === 'shipments' ? '1px solid #dee2e6' : 'none'
                                         }}
                                     >
                                         Shipments
                                     </div>
+                                    <div
+                                        onClick={() => setActiveResearchTab('commercial')}
+                                        style={{
+                                            padding: '10px 20px',
+                                            cursor: 'pointer',
+                                            backgroundColor: activeResearchTab === 'commercial' ? '#ffffff' : 'transparent',
+                                            borderBottom: activeResearchTab === 'commercial' ? '2px solid #007bff' : 'none',
+                                            fontWeight: activeResearchTab === 'commercial' ? 'bold' : 'normal',
+                                            border: activeResearchTab === 'commercial' ? '1px solid #dee2e6' : 'none'
+                                        }}
+                                    >
+                                        Commercial
+                                    </div>
+                                    <div
+                                        onClick={() => setActiveResearchTab('grants')}
+                                        style={{
+                                            padding: '10px 20px',
+                                            cursor: 'pointer',
+                                            backgroundColor: activeResearchTab === 'grants' ? '#ffffff' : 'transparent',
+                                            borderBottom: activeResearchTab === 'grants' ? '2px solid #007bff' : 'none',
+                                            fontWeight: activeResearchTab === 'grants' ? 'bold' : 'normal',
+                                            border: activeResearchTab === 'grants' ? '1px solid #dee2e6' : 'none'
+                                        }}
+                                    >
+                                        Grants
+                                    </div>
                                 </div>
                                 <div style={{ backgroundColor: '#ffffff', padding: '20px', border: '1px solid #dee2e6', borderRadius: '0 0 4px 4px' }}>
                                     {activeResearchTab === 'projects' && (
-                                        <ProjectTab />
+                                        <ProjectTab userData={userData} />
                                     )}
                                     {activeResearchTab === 'shipments' && (
                                         <ShipmentsTab userData={userData} />
+                                    )}
+                                    {activeResearchTab === 'commercial' && (
+                                        <CommercialTab userData={userData} />
+                                    )}
+                                    {activeResearchTab === 'grants' && (
+                                        <GrantsTab userData={userData} />
                                     )}
                                 </div>
                             </div>
@@ -571,15 +737,8 @@ function Dashboard({ userData, onLogout }) {
 
                         {!loading && !error && activeTab === 'inventory' && (
                             <div>
-                                <h2>Inventory Management</h2>
-
-                                {/* Inventory Sub-tabs */}
-                                <div style={{
-                                    display: 'flex',
-                                    borderBottom: '1px solid #dee2e6',
-                                    marginBottom: '20px',
-                                    backgroundColor: '#f8f9fa'
-                                }}>
+                                <h2>Inventory</h2>
+                                <div style={{ display: 'flex', borderBottom: '1px solid #dee2e6', marginBottom: '20px', backgroundColor: '#f8f9fa' }}>
                                     <div
                                         onClick={() => setActiveInventoryTab('assets')}
                                         style={{
@@ -588,8 +747,7 @@ function Dashboard({ userData, onLogout }) {
                                             backgroundColor: activeInventoryTab === 'assets' ? '#ffffff' : 'transparent',
                                             borderBottom: activeInventoryTab === 'assets' ? '2px solid #007bff' : 'none',
                                             fontWeight: activeInventoryTab === 'assets' ? 'bold' : 'normal',
-                                            border: activeInventoryTab === 'assets' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeInventoryTab === 'assets' ? 'none' : '1px solid #dee2e6'
+                                            border: activeInventoryTab === 'assets' ? '1px solid #dee2e6' : 'none'
                                         }}
                                     >
                                         Assets
@@ -602,8 +760,7 @@ function Dashboard({ userData, onLogout }) {
                                             backgroundColor: activeInventoryTab === 'chemicals' ? '#ffffff' : 'transparent',
                                             borderBottom: activeInventoryTab === 'chemicals' ? '2px solid #007bff' : 'none',
                                             fontWeight: activeInventoryTab === 'chemicals' ? 'bold' : 'normal',
-                                            border: activeInventoryTab === 'chemicals' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeInventoryTab === 'chemicals' ? 'none' : '1px solid #dee2e6'
+                                            border: activeInventoryTab === 'chemicals' ? '1px solid #dee2e6' : 'none'
                                         }}
                                     >
                                         Chemicals
@@ -616,11 +773,36 @@ function Dashboard({ userData, onLogout }) {
                                             backgroundColor: activeInventoryTab === 'consumables' ? '#ffffff' : 'transparent',
                                             borderBottom: activeInventoryTab === 'consumables' ? '2px solid #007bff' : 'none',
                                             fontWeight: activeInventoryTab === 'consumables' ? 'bold' : 'normal',
-                                            border: activeInventoryTab === 'consumables' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeInventoryTab === 'consumables' ? 'none' : '1px solid #dee2e6'
+                                            border: activeInventoryTab === 'consumables' ? '1px solid #dee2e6' : 'none'
                                         }}
                                     >
                                         Consumables
+                                    </div>
+                                    <div
+                                        onClick={() => setActiveInventoryTab('strains')}
+                                        style={{
+                                            padding: '10px 20px',
+                                            cursor: 'pointer',
+                                            backgroundColor: activeInventoryTab === 'strains' ? '#ffffff' : 'transparent',
+                                            borderBottom: activeInventoryTab === 'strains' ? '2px solid #007bff' : 'none',
+                                            fontWeight: activeInventoryTab === 'strains' ? 'bold' : 'normal',
+                                            border: activeInventoryTab === 'strains' ? '1px solid #dee2e6' : 'none'
+                                        }}
+                                    >
+                                        Strains
+                                    </div>
+                                    <div
+                                        onClick={() => setActiveInventoryTab('proteins')}
+                                        style={{
+                                            padding: '10px 20px',
+                                            cursor: 'pointer',
+                                            backgroundColor: activeInventoryTab === 'proteins' ? '#ffffff' : 'transparent',
+                                            borderBottom: activeInventoryTab === 'proteins' ? '2px solid #007bff' : 'none',
+                                            fontWeight: activeInventoryTab === 'proteins' ? 'bold' : 'normal',
+                                            border: activeInventoryTab === 'proteins' ? '1px solid #dee2e6' : 'none'
+                                        }}
+                                    >
+                                        Proteins
                                     </div>
                                     <div
                                         onClick={() => setActiveInventoryTab('ligands')}
@@ -630,8 +812,7 @@ function Dashboard({ userData, onLogout }) {
                                             backgroundColor: activeInventoryTab === 'ligands' ? '#ffffff' : 'transparent',
                                             borderBottom: activeInventoryTab === 'ligands' ? '2px solid #007bff' : 'none',
                                             fontWeight: activeInventoryTab === 'ligands' ? 'bold' : 'normal',
-                                            border: activeInventoryTab === 'ligands' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeInventoryTab === 'ligands' ? 'none' : '1px solid #dee2e6'
+                                            border: activeInventoryTab === 'ligands' ? '1px solid #dee2e6' : 'none'
                                         }}
                                     >
                                         Ligands
@@ -644,161 +825,103 @@ function Dashboard({ userData, onLogout }) {
                                             backgroundColor: activeInventoryTab === 'plasmids' ? '#ffffff' : 'transparent',
                                             borderBottom: activeInventoryTab === 'plasmids' ? '2px solid #007bff' : 'none',
                                             fontWeight: activeInventoryTab === 'plasmids' ? 'bold' : 'normal',
-                                            border: activeInventoryTab === 'plasmids' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeInventoryTab === 'plasmids' ? 'none' : '1px solid #dee2e6'
+                                            border: activeInventoryTab === 'plasmids' ? '1px solid #dee2e6' : 'none'
                                         }}
                                     >
                                         Plasmids
                                     </div>
-                                    <div
-                                        onClick={() => setActiveInventoryTab('proteins')}
-                                        style={{
-                                            padding: '10px 20px',
-                                            cursor: 'pointer',
-                                            backgroundColor: activeInventoryTab === 'proteins' ? '#ffffff' : 'transparent',
-                                            borderBottom: activeInventoryTab === 'proteins' ? '2px solid #007bff' : 'none',
-                                            fontWeight: activeInventoryTab === 'proteins' ? 'bold' : 'normal',
-                                            border: activeInventoryTab === 'proteins' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeInventoryTab === 'proteins' ? 'none' : '1px solid #dee2e6'
-                                        }}
-                                    >
-                                        Proteins
-                                    </div>
-                                    <div
-                                        onClick={() => setActiveInventoryTab('resources')}
-                                        style={{
-                                            padding: '10px 20px',
-                                            cursor: 'pointer',
-                                            backgroundColor: activeInventoryTab === 'resources' ? '#ffffff' : 'transparent',
-                                            borderBottom: activeInventoryTab === 'resources' ? '2px solid #007bff' : 'none',
-                                            fontWeight: activeInventoryTab === 'resources' ? 'bold' : 'normal',
-                                            border: activeInventoryTab === 'resources' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeInventoryTab === 'resources' ? 'none' : '1px solid #dee2e6'
-                                        }}
-                                    >
-                                        Resources
-                                    </div>
-                                    <div
-                                        onClick={() => setActiveInventoryTab('strains')}
-                                        style={{
-                                            padding: '10px 20px',
-                                            cursor: 'pointer',
-                                            backgroundColor: activeInventoryTab === 'strains' ? '#ffffff' : 'transparent',
-                                            borderBottom: activeInventoryTab === 'strains' ? '2px solid #007bff' : 'none',
-                                            fontWeight: activeInventoryTab === 'strains' ? 'bold' : 'normal',
-                                            border: activeInventoryTab === 'strains' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeInventoryTab === 'strains' ? 'none' : '1px solid #dee2e6'
-                                        }}
-                                    >
-                                        Strains
-                                    </div>
                                 </div>
-
-                                {/* Inventory Sub-tab Content */}
                                 <div style={{ backgroundColor: '#ffffff', padding: '20px', border: '1px solid #dee2e6', borderRadius: '0 0 4px 4px' }}>
                                     {activeInventoryTab === 'assets' && (
                                         <div>
-                                            <h3>Assets Management</h3>
-
-                                            {/* Assets Sub-tabs */}
-                                            <div style={{
-                                                display: 'flex',
-                                                borderBottom: '1px solid #dee2e6',
-                                                marginBottom: '20px',
-                                                backgroundColor: '#f8f9fa'
-                                            }}>
+                                            <h3>Assets</h3>
+                                            <div style={{ display: 'flex', borderBottom: '1px solid #dee2e6', marginBottom: '20px', backgroundColor: '#f8f9fa' }}>
                                                 <div
                                                     onClick={() => setActiveAssetsTab('equipment')}
                                                     style={{
-                                                        padding: '8px 16px',
+                                                        padding: '10px 20px',
                                                         cursor: 'pointer',
                                                         backgroundColor: activeAssetsTab === 'equipment' ? '#ffffff' : 'transparent',
                                                         borderBottom: activeAssetsTab === 'equipment' ? '2px solid #007bff' : 'none',
                                                         fontWeight: activeAssetsTab === 'equipment' ? 'bold' : 'normal',
-                                                        border: activeAssetsTab === 'equipment' ? '1px solid #dee2e6' : 'none',
-                                                        borderBottom: activeAssetsTab === 'equipment' ? 'none' : '1px solid #dee2e6'
+                                                        border: activeAssetsTab === 'equipment' ? '1px solid #dee2e6' : 'none'
                                                     }}
                                                 >
                                                     Equipment
                                                 </div>
                                                 <div
-                                                    onClick={() => setActiveAssetsTab('it')}
+                                                    onClick={() => setActiveAssetsTab('resources')}
                                                     style={{
-                                                        padding: '8px 16px',
+                                                        padding: '10px 20px',
                                                         cursor: 'pointer',
-                                                        backgroundColor: activeAssetsTab === 'it' ? '#ffffff' : 'transparent',
-                                                        borderBottom: activeAssetsTab === 'it' ? '2px solid #007bff' : 'none',
-                                                        fontWeight: activeAssetsTab === 'it' ? 'bold' : 'normal',
-                                                        border: activeAssetsTab === 'it' ? '1px solid #dee2e6' : 'none',
-                                                        borderBottom: activeAssetsTab === 'it' ? 'none' : '1px solid #dee2e6'
+                                                        backgroundColor: activeAssetsTab === 'resources' ? '#ffffff' : 'transparent',
+                                                        borderBottom: activeAssetsTab === 'resources' ? '2px solid #007bff' : 'none',
+                                                        fontWeight: activeAssetsTab === 'resources' ? 'bold' : 'normal',
+                                                        border: activeAssetsTab === 'resources' ? '1px solid #dee2e6' : 'none'
                                                     }}
                                                 >
-                                                    IT
+                                                    Resources
                                                 </div>
                                                 <div
                                                     onClick={() => setActiveAssetsTab('tools')}
                                                     style={{
-                                                        padding: '8px 16px',
+                                                        padding: '10px 20px',
                                                         cursor: 'pointer',
                                                         backgroundColor: activeAssetsTab === 'tools' ? '#ffffff' : 'transparent',
                                                         borderBottom: activeAssetsTab === 'tools' ? '2px solid #007bff' : 'none',
                                                         fontWeight: activeAssetsTab === 'tools' ? 'bold' : 'normal',
-                                                        border: activeAssetsTab === 'tools' ? '1px solid #dee2e6' : 'none',
-                                                        borderBottom: activeAssetsTab === 'tools' ? 'none' : '1px solid #dee2e6'
+                                                        border: activeAssetsTab === 'tools' ? '1px solid #dee2e6' : 'none'
                                                     }}
                                                 >
                                                     Tools
                                                 </div>
+                                                <div
+                                                    onClick={() => setActiveAssetsTab('it')}
+                                                    style={{
+                                                        padding: '10px 20px',
+                                                        cursor: 'pointer',
+                                                        backgroundColor: activeAssetsTab === 'it' ? '#ffffff' : 'transparent',
+                                                        borderBottom: activeAssetsTab === 'it' ? '2px solid #007bff' : 'none',
+                                                        fontWeight: activeAssetsTab === 'it' ? 'bold' : 'normal',
+                                                        border: activeAssetsTab === 'it' ? '1px solid #dee2e6' : 'none'
+                                                    }}
+                                                >
+                                                    IT
+                                                </div>
                                             </div>
-
-                                            {/* Assets Sub-tab Content */}
-                                            <div>
+                                            <div style={{ backgroundColor: '#ffffff', padding: '20px', border: '1px solid #dee2e6', borderRadius: '0 0 4px 4px' }}>
                                                 {activeAssetsTab === 'equipment' && (
-                                                    <EquipmentTab
-                                                        equipment={equipment}
-                                                        facilities={facilities}
-                                                        userData={userData}
-                                                        onEquipmentUpdate={handleEquipmentUpdate}
-                                                    />
+                                                    <EquipmentTab userData={userData} equipment={equipment} onEquipmentUpdate={handleEquipmentUpdate} />
                                                 )}
-
+                                                {activeAssetsTab === 'resources' && (
+                                                    <ResourcesTab userData={userData} />
+                                                )}
                                                 {activeAssetsTab === 'tools' && (
                                                     <ToolsTab userData={userData} />
                                                 )}
-
                                                 {activeAssetsTab === 'it' && (
                                                     <ITTab userData={userData} />
                                                 )}
                                             </div>
                                         </div>
                                     )}
-
                                     {activeInventoryTab === 'chemicals' && (
                                         <ChemicalsTab userData={userData} />
                                     )}
-
                                     {activeInventoryTab === 'consumables' && (
                                         <ConsumablesTab userData={userData} />
                                     )}
-
-                                    {activeInventoryTab === 'ligands' && (
-                                        <LigandsTab userData={userData} />
+                                    {activeInventoryTab === 'strains' && (
+                                        <StrainsTab userData={userData} />
                                     )}
-
-                                    {activeInventoryTab === 'plasmids' && (
-                                        <PlasmidsTab userData={userData} />
-                                    )}
-
                                     {activeInventoryTab === 'proteins' && (
                                         <ProteinsTab userData={userData} />
                                     )}
-
-                                    {activeInventoryTab === 'resources' && (
-                                        <ResourcesTab userData={userData} />
+                                    {activeInventoryTab === 'ligands' && (
+                                        <LigandsTab userData={userData} />
                                     )}
-
-                                    {activeInventoryTab === 'strains' && (
-                                        <StrainsTab userData={userData} />
+                                    {activeInventoryTab === 'plasmids' && (
+                                        <PlasmidsTab userData={userData} />
                                     )}
                                 </div>
                             </div>
@@ -806,57 +929,8 @@ function Dashboard({ userData, onLogout }) {
 
                         {!loading && !error && activeTab === 'finance' && (
                             <div>
-                                <h2>Finance & Billing</h2>
-
-                                {/* Finance Sub-tabs */}
-                                <div style={{
-                                    display: 'flex',
-                                    borderBottom: '1px solid #dee2e6',
-                                    marginBottom: '20px',
-                                    backgroundColor: '#f8f9fa'
-                                }}>
-                                    <div
-                                        onClick={() => setActiveFinanceTab('commercial')}
-                                        style={{
-                                            padding: '10px 20px',
-                                            cursor: 'pointer',
-                                            backgroundColor: activeFinanceTab === 'commercial' ? '#ffffff' : 'transparent',
-                                            borderBottom: activeFinanceTab === 'commercial' ? '2px solid #007bff' : 'none',
-                                            fontWeight: activeFinanceTab === 'commercial' ? 'bold' : 'normal',
-                                            border: activeFinanceTab === 'commercial' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeFinanceTab === 'commercial' ? 'none' : '1px solid #dee2e6'
-                                        }}
-                                    >
-                                        Commercial Contracts
-                                    </div>
-                                    <div
-                                        onClick={() => setActiveFinanceTab('grants')}
-                                        style={{
-                                            padding: '10px 20px',
-                                            cursor: 'pointer',
-                                            backgroundColor: activeFinanceTab === 'grants' ? '#ffffff' : 'transparent',
-                                            borderBottom: activeFinanceTab === 'grants' ? '2px solid #007bff' : 'none',
-                                            fontWeight: activeFinanceTab === 'grants' ? 'bold' : 'normal',
-                                            border: activeFinanceTab === 'grants' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeFinanceTab === 'grants' ? 'none' : '1px solid #dee2e6'
-                                        }}
-                                    >
-                                        Costing Grants
-                                    </div>
-                                    <div
-                                        onClick={() => setActiveFinanceTab('costing-model')}
-                                        style={{
-                                            padding: '10px 20px',
-                                            cursor: 'pointer',
-                                            backgroundColor: activeFinanceTab === 'costing-model' ? '#ffffff' : 'transparent',
-                                            borderBottom: activeFinanceTab === 'costing-model' ? '2px solid #007bff' : 'none',
-                                            fontWeight: activeFinanceTab === 'costing-model' ? 'bold' : 'normal',
-                                            border: activeFinanceTab === 'costing-model' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeFinanceTab === 'costing-model' ? 'none' : '1px solid #dee2e6'
-                                        }}
-                                    >
-                                        Costing Model
-                                    </div>
+                                <h2>Finance</h2>
+                                <div style={{ display: 'flex', borderBottom: '1px solid #dee2e6', marginBottom: '20px', backgroundColor: '#f8f9fa' }}>
                                     <div
                                         onClick={() => setActiveFinanceTab('invoicing')}
                                         style={{
@@ -865,8 +939,7 @@ function Dashboard({ userData, onLogout }) {
                                             backgroundColor: activeFinanceTab === 'invoicing' ? '#ffffff' : 'transparent',
                                             borderBottom: activeFinanceTab === 'invoicing' ? '2px solid #007bff' : 'none',
                                             fontWeight: activeFinanceTab === 'invoicing' ? 'bold' : 'normal',
-                                            border: activeFinanceTab === 'invoicing' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeFinanceTab === 'invoicing' ? 'none' : '1px solid #dee2e6'
+                                            border: activeFinanceTab === 'invoicing' ? '1px solid #dee2e6' : 'none'
                                         }}
                                     >
                                         Invoicing
@@ -879,236 +952,50 @@ function Dashboard({ userData, onLogout }) {
                                             backgroundColor: activeFinanceTab === 'spending' ? '#ffffff' : 'transparent',
                                             borderBottom: activeFinanceTab === 'spending' ? '2px solid #007bff' : 'none',
                                             fontWeight: activeFinanceTab === 'spending' ? 'bold' : 'normal',
-                                            border: activeFinanceTab === 'spending' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeFinanceTab === 'spending' ? 'none' : '1px solid #dee2e6'
+                                            border: activeFinanceTab === 'spending' ? '1px solid #dee2e6' : 'none'
                                         }}
                                     >
                                         Spending
                                     </div>
+                                    <div
+                                        onClick={() => setActiveFinanceTab('costing-model')}
+                                        style={{
+                                            padding: '10px 20px',
+                                            cursor: 'pointer',
+                                            backgroundColor: activeFinanceTab === 'costing-model' ? '#ffffff' : 'transparent',
+                                            borderBottom: activeFinanceTab === 'costing-model' ? '2px solid #007bff' : 'none',
+                                            fontWeight: activeFinanceTab === 'costing-model' ? 'bold' : 'normal',
+                                            border: activeFinanceTab === 'costing-model' ? '1px solid #dee2e6' : 'none'
+                                        }}
+                                    >
+                                        Costing Model
+                                    </div>
+                                    <div
+                                        onClick={() => setActiveFinanceTab('reports-stats')}
+                                        style={{
+                                            padding: '10px 20px',
+                                            cursor: 'pointer',
+                                            backgroundColor: activeFinanceTab === 'reports-stats' ? '#ffffff' : 'transparent',
+                                            borderBottom: activeFinanceTab === 'reports-stats' ? '2px solid #007bff' : 'none',
+                                            fontWeight: activeFinanceTab === 'reports-stats' ? 'bold' : 'normal',
+                                            border: activeFinanceTab === 'reports-stats' ? '1px solid #dee2e6' : 'none'
+                                        }}
+                                    >
+                                        Reports & Stats
+                                    </div>
                                 </div>
-
-                                {/* Finance Sub-tab Content */}
                                 <div style={{ backgroundColor: '#ffffff', padding: '20px', border: '1px solid #dee2e6', borderRadius: '0 0 4px 4px' }}>
-                                    {activeFinanceTab === 'commercial' && (
-                                        <CommercialTab userData={userData} />
-                                    )}
-
-                                    {activeFinanceTab === 'grants' && (
-                                        <GrantsTab userData={userData} />
-                                    )}
-
-                                    {activeFinanceTab === 'costing-model' && (
-                                        <CostingModelTab userData={userData} />
-                                    )}
-
                                     {activeFinanceTab === 'invoicing' && (
                                         <InvoicingTab userData={userData} />
                                     )}
-
                                     {activeFinanceTab === 'spending' && (
                                         <SpendingTab userData={userData} />
                                     )}
-                                </div>
-                            </div>
-                        )}
-
-                        {!loading && !error && activeTab === 'compliance' && (
-                            <div>
-                                <h2>Compliance Management</h2>
-
-                                {/* Compliance Sub-tabs */}
-                                <div style={{
-                                    display: 'flex',
-                                    borderBottom: '1px solid #dee2e6',
-                                    marginBottom: '20px',
-                                    backgroundColor: '#f8f9fa',
-                                    flexWrap: 'wrap'
-                                }}>
-                                    <div
-                                        onClick={() => setActiveComplianceTab('emergency-procedures')}
-                                        style={{
-                                            padding: '10px 20px',
-                                            cursor: 'pointer',
-                                            backgroundColor: activeComplianceTab === 'emergency-procedures' ? '#ffffff' : 'transparent',
-                                            borderBottom: activeComplianceTab === 'emergency-procedures' ? '2px solid #007bff' : 'none',
-                                            fontWeight: activeComplianceTab === 'emergency-procedures' ? 'bold' : 'normal',
-                                            border: activeComplianceTab === 'emergency-procedures' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeComplianceTab === 'emergency-procedures' ? 'none' : '1px solid #dee2e6'
-                                        }}
-                                    >
-                                        Emergency Procedures
-                                    </div>
-                                    <div
-                                        onClick={() => setActiveComplianceTab('incident-reports')}
-                                        style={{
-                                            padding: '10px 20px',
-                                            cursor: 'pointer',
-                                            backgroundColor: activeComplianceTab === 'incident-reports' ? '#ffffff' : 'transparent',
-                                            borderBottom: activeComplianceTab === 'incident-reports' ? '2px solid #007bff' : 'none',
-                                            fontWeight: activeComplianceTab === 'incident-reports' ? 'bold' : 'normal',
-                                            border: activeComplianceTab === 'incident-reports' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeComplianceTab === 'incident-reports' ? 'none' : '1px solid #dee2e6'
-                                        }}
-                                    >
-                                        Incident Reports
-                                    </div>
-                                    <div
-                                        onClick={() => setActiveComplianceTab('local-rules')}
-                                        style={{
-                                            padding: '10px 20px',
-                                            cursor: 'pointer',
-                                            backgroundColor: activeComplianceTab === 'local-rules' ? '#ffffff' : 'transparent',
-                                            borderBottom: activeComplianceTab === 'local-rules' ? '2px solid #007bff' : 'none',
-                                            fontWeight: activeComplianceTab === 'local-rules' ? 'bold' : 'normal',
-                                            border: activeComplianceTab === 'local-rules' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeComplianceTab === 'local-rules' ? 'none' : '1px solid #dee2e6'
-                                        }}
-                                    >
-                                        Local Rules
-                                    </div>
-                                    <div
-                                        onClick={() => setActiveComplianceTab('msds')}
-                                        style={{
-                                            padding: '10px 20px',
-                                            cursor: 'pointer',
-                                            backgroundColor: activeComplianceTab === 'msds' ? '#ffffff' : 'transparent',
-                                            borderBottom: activeComplianceTab === 'msds' ? '2px solid #007bff' : 'none',
-                                            fontWeight: activeComplianceTab === 'msds' ? 'bold' : 'normal',
-                                            border: activeComplianceTab === 'msds' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeComplianceTab === 'msds' ? 'none' : '1px solid #dee2e6'
-                                        }}
-                                    >
-                                        MSDS
-                                    </div>
-                                    <div
-                                        onClick={() => setActiveComplianceTab('risk-assessments')}
-                                        style={{
-                                            padding: '10px 20px',
-                                            cursor: 'pointer',
-                                            backgroundColor: activeComplianceTab === 'risk-assessments' ? '#ffffff' : 'transparent',
-                                            borderBottom: activeComplianceTab === 'risk-assessments' ? '2px solid #007bff' : 'none',
-                                            fontWeight: activeComplianceTab === 'risk-assessments' ? 'bold' : 'normal',
-                                            border: activeComplianceTab === 'risk-assessments' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeComplianceTab === 'risk-assessments' ? 'none' : '1px solid #dee2e6'
-                                        }}
-                                    >
-                                        Risk Assessments
-                                    </div>
-                                    <div
-                                        onClick={() => setActiveComplianceTab('safety-inspection-reports')}
-                                        style={{
-                                            padding: '10px 20px',
-                                            cursor: 'pointer',
-                                            backgroundColor: activeComplianceTab === 'safety-inspection-reports' ? '#ffffff' : 'transparent',
-                                            borderBottom: activeComplianceTab === 'safety-inspection-reports' ? '2px solid #007bff' : 'none',
-                                            fontWeight: activeComplianceTab === 'safety-inspection-reports' ? 'bold' : 'normal',
-                                            border: activeComplianceTab === 'safety-inspection-reports' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeComplianceTab === 'safety-inspection-reports' ? 'none' : '1px solid #dee2e6'
-                                        }}
-                                    >
-                                        Safety Inspection Reports
-                                    </div>
-                                    <div
-                                        onClick={() => setActiveComplianceTab('sop')}
-                                        style={{
-                                            padding: '10px 20px',
-                                            cursor: 'pointer',
-                                            backgroundColor: activeComplianceTab === 'sop' ? '#ffffff' : 'transparent',
-                                            borderBottom: activeComplianceTab === 'sop' ? '2px solid #007bff' : 'none',
-                                            fontWeight: activeComplianceTab === 'sop' ? 'bold' : 'normal',
-                                            border: activeComplianceTab === 'sop' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeComplianceTab === 'sop' ? 'none' : '1px solid #dee2e6'
-                                        }}
-                                    >
-                                        SOP
-                                    </div>
-                                    <div
-                                        onClick={() => setActiveComplianceTab('training')}
-                                        style={{
-                                            padding: '10px 20px',
-                                            cursor: 'pointer',
-                                            backgroundColor: activeComplianceTab === 'training' ? '#ffffff' : 'transparent',
-                                            borderBottom: activeComplianceTab === 'training' ? '2px solid #007bff' : 'none',
-                                            fontWeight: activeComplianceTab === 'training' ? 'bold' : 'normal',
-                                            border: activeComplianceTab === 'training' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeComplianceTab === 'training' ? 'none' : '1px solid #dee2e6'
-                                        }}
-                                    >
-                                        Training
-                                    </div>
-                                    <div
-                                        onClick={() => setActiveComplianceTab('waste-disposal-procedures')}
-                                        style={{
-                                            padding: '10px 20px',
-                                            cursor: 'pointer',
-                                            backgroundColor: activeComplianceTab === 'waste-disposal-procedures' ? '#ffffff' : 'transparent',
-                                            borderBottom: activeComplianceTab === 'waste-disposal-procedures' ? '2px solid #007bff' : 'none',
-                                            fontWeight: activeComplianceTab === 'waste-disposal-procedures' ? 'bold' : 'normal',
-                                            border: activeComplianceTab === 'waste-disposal-procedures' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeComplianceTab === 'waste-disposal-procedures' ? 'none' : '1px solid #dee2e6'
-                                        }}
-                                    >
-                                        Waste Disposal Procedures
-                                    </div>
-                                </div>
-
-                                {/* Compliance Sub-tab Content */}
-                                <div>
-                                    {activeComplianceTab === 'training' && (
-                                        <TrainingPage userData={userData} />
+                                    {activeFinanceTab === 'costing-model' && (
+                                        <CostingModelTab userData={userData} />
                                     )}
-
-                                    {activeComplianceTab === 'sop' && (
-                                        <div>
-                                            <h3>Standard Operating Procedures (SOP)</h3>
-                                            <p>SOP management functionality coming soon...</p>
-                                            <div style={{
-                                                backgroundColor: '#f3e5f5',
-                                                padding: '15px',
-                                                borderRadius: '4px',
-                                                border: '1px solid #e1bee7'
-                                            }}>
-                                                <h4>Features to be implemented:</h4>
-                                                <ul>
-                                                    <li>SOP document management</li>
-                                                    <li>Version control</li>
-                                                    <li>Equipment-specific procedures</li>
-                                                    <li>Training material integration</li>
-                                                    <li>Approval workflows</li>
-                                                    <li>Document distribution and access control</li>
-                                                    <li>Compliance tracking and reporting</li>
-                                                    <li>Digital signatures and attestation</li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {activeComplianceTab === 'risk-assessments' && (
-                                        <RiskAssessments userData={userData} />
-                                    )}
-
-                                    {activeComplianceTab === 'msds' && (
-                                        <MSDS userData={userData} />
-                                    )}
-
-                                    {activeComplianceTab === 'incident-reports' && (
-                                        <IncidentReports userData={userData} />
-                                    )}
-
-                                    {activeComplianceTab === 'safety-inspection-reports' && (
-                                        <SafetyInspectionReports userData={userData} />
-                                    )}
-
-                                    {activeComplianceTab === 'emergency-procedures' && (
-                                        <EmergencyProcedures userData={userData} />
-                                    )}
-
-                                    {activeComplianceTab === 'local-rules' && (
-                                        <LocalRules userData={userData} />
-                                    )}
-
-                                    {activeComplianceTab === 'waste-disposal-procedures' && (
-                                        <WasteDisposalProcedures userData={userData} />
+                                    {activeFinanceTab === 'reports-stats' && (
+                                        <ReportsStats userData={userData} />
                                     )}
                                 </div>
                             </div>
@@ -1116,43 +1003,8 @@ function Dashboard({ userData, onLogout }) {
 
                         {!loading && !error && activeTab === 'support' && (
                             <div>
-                                <h2>Support Center</h2>
-
-                                {/* Support Sub-tabs */}
-                                <div style={{
-                                    display: 'flex',
-                                    borderBottom: '1px solid #dee2e6',
-                                    marginBottom: '20px',
-                                    backgroundColor: '#f8f9fa'
-                                }}>
-                                    <div
-                                        onClick={() => setActiveSupportTab('feedback')}
-                                        style={{
-                                            padding: '10px 20px',
-                                            cursor: 'pointer',
-                                            backgroundColor: activeSupportTab === 'feedback' ? '#ffffff' : 'transparent',
-                                            borderBottom: activeSupportTab === 'feedback' ? '2px solid #007bff' : 'none',
-                                            fontWeight: activeSupportTab === 'feedback' ? 'bold' : 'normal',
-                                            border: activeSupportTab === 'feedback' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeSupportTab === 'feedback' ? 'none' : '1px solid #dee2e6'
-                                        }}
-                                    >
-                                        Feedback
-                                    </div>
-                                    <div
-                                        onClick={() => setActiveSupportTab('reports-stats')}
-                                        style={{
-                                            padding: '10px 20px',
-                                            cursor: 'pointer',
-                                            backgroundColor: activeSupportTab === 'reports-stats' ? '#ffffff' : 'transparent',
-                                            borderBottom: activeSupportTab === 'reports-stats' ? '2px solid #007bff' : 'none',
-                                            fontWeight: activeSupportTab === 'reports-stats' ? 'bold' : 'normal',
-                                            border: activeSupportTab === 'reports-stats' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeSupportTab === 'reports-stats' ? 'none' : '1px solid #dee2e6'
-                                        }}
-                                    >
-                                        Reports & Stats
-                                    </div>
+                                <h2>Support</h2>
+                                <div style={{ display: 'flex', borderBottom: '1px solid #dee2e6', marginBottom: '20px', backgroundColor: '#f8f9fa' }}>
                                     <div
                                         onClick={() => setActiveSupportTab('tickets')}
                                         style={{
@@ -1161,26 +1013,73 @@ function Dashboard({ userData, onLogout }) {
                                             backgroundColor: activeSupportTab === 'tickets' ? '#ffffff' : 'transparent',
                                             borderBottom: activeSupportTab === 'tickets' ? '2px solid #007bff' : 'none',
                                             fontWeight: activeSupportTab === 'tickets' ? 'bold' : 'normal',
-                                            border: activeSupportTab === 'tickets' ? '1px solid #dee2e6' : 'none',
-                                            borderBottom: activeSupportTab === 'tickets' ? 'none' : '1px solid #dee2e6'
+                                            border: activeSupportTab === 'tickets' ? '1px solid #dee2e6' : 'none'
                                         }}
                                     >
                                         Tickets
                                     </div>
+                                    <div
+                                        onClick={() => setActiveSupportTab('feedback')}
+                                        style={{
+                                            padding: '10px 20px',
+                                            cursor: 'pointer',
+                                            backgroundColor: activeSupportTab === 'feedback' ? '#ffffff' : 'transparent',
+                                            borderBottom: activeSupportTab === 'feedback' ? '2px solid #007bff' : 'none',
+                                            fontWeight: activeSupportTab === 'feedback' ? 'bold' : 'normal',
+                                            border: activeSupportTab === 'feedback' ? '1px solid #dee2e6' : 'none'
+                                        }}
+                                    >
+                                        Feedback
+                                    </div>
                                 </div>
-
-                                {/* Support Sub-tab Content */}
                                 <div style={{ backgroundColor: '#ffffff', padding: '20px', border: '1px solid #dee2e6', borderRadius: '0 0 4px 4px' }}>
                                     {activeSupportTab === 'tickets' && (
                                         <Tickets userData={userData} />
                                     )}
-
                                     {activeSupportTab === 'feedback' && (
                                         <Feedback userData={userData} />
                                     )}
+                                </div>
+                            </div>
+                        )}
 
-                                    {activeSupportTab === 'reports-stats' && (
-                                        <ReportsStats userData={userData} />
+                        {!loading && !error && activeTab === 'setup' && (
+                            <div>
+                                <h2>Setup</h2>
+                                <div style={{ display: 'flex', borderBottom: '1px solid #dee2e6', marginBottom: '20px', backgroundColor: '#f8f9fa' }}>
+                                    <div
+                                        onClick={() => setActiveSetupTab('preferences')}
+                                        style={{
+                                            padding: '10px 20px',
+                                            cursor: 'pointer',
+                                            backgroundColor: activeSetupTab === 'preferences' ? '#ffffff' : 'transparent',
+                                            borderBottom: activeSetupTab === 'preferences' ? '2px solid #007bff' : 'none',
+                                            fontWeight: activeSetupTab === 'preferences' ? 'bold' : 'normal',
+                                            border: activeSetupTab === 'preferences' ? '1px solid #dee2e6' : 'none'
+                                        }}
+                                    >
+                                        Preferences
+                                    </div>
+                                    <div
+                                        onClick={() => setActiveSetupTab('file-upload')}
+                                        style={{
+                                            padding: '10px 20px',
+                                            cursor: 'pointer',
+                                            backgroundColor: activeSetupTab === 'file-upload' ? '#ffffff' : 'transparent',
+                                            borderBottom: activeSetupTab === 'file-upload' ? '2px solid #007bff' : 'none',
+                                            fontWeight: activeSetupTab === 'file-upload' ? 'bold' : 'normal',
+                                            border: activeSetupTab === 'file-upload' ? '1px solid #dee2e6' : 'none'
+                                        }}
+                                    >
+                                        File Upload
+                                    </div>
+                                </div>
+                                <div style={{ backgroundColor: '#ffffff', padding: '20px', border: '1px solid #dee2e6', borderRadius: '0 0 4px 4px' }}>
+                                    {activeSetupTab === 'preferences' && (
+                                        <PreferencesTab userData={userData} />
+                                    )}
+                                    {activeSetupTab === 'file-upload' && (
+                                        <FileUploadTab userData={userData} />
                                     )}
                                 </div>
                             </div>
