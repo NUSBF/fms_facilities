@@ -3,6 +3,7 @@ import axios from 'axios';
 
 function ColumnsTab({ userData }) {
     const [columns, setColumns] = useState([]);
+    const [pdfFiles, setPdfFiles] = useState([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
@@ -41,10 +42,33 @@ function ColumnsTab({ userData }) {
         length: { width: '80px' },
         diameter: { width: '80px' },
         volume: { width: '80px' },
-        voidVolume: { width: '80px' }
+        voidVolume: { width: '80px' },
+        pdfFile: { width: '100%' }
     };
     
     // Fetch columns from the database
+    // Fetch PDF files from the server
+    const fetchPdfFiles = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+            
+            const config = {
+                headers: { Authorization: `Bearer ${token}` }
+            };
+            
+            const response = await axios.get('/fms-api/file-uploads', config);
+            // Filter only PDF files
+            const pdfFilesOnly = response.data.filter(file => 
+                file.file_type === 'application/pdf' || 
+                file.original_name.toLowerCase().endsWith('.pdf')
+            );
+            setPdfFiles(pdfFilesOnly);
+        } catch (err) {
+            console.error('Error fetching PDF files:', err);
+        }
+    };
+
     useEffect(() => {
         const fetchColumns = async () => {
             try {
@@ -70,6 +94,9 @@ function ColumnsTab({ userData }) {
                 }));
                 setColumns(initializedColumns);
                 setLoading(false);
+                
+                // Fetch PDF files after columns are loaded
+                fetchPdfFiles();
             } catch (err) {
                 console.error('Error fetching columns:', err);
                 if (err.response && err.response.data && err.response.data.error) {
@@ -94,9 +121,23 @@ function ColumnsTab({ userData }) {
     
     // Update column field in both local state and database
     const updateColumnField = async (column, fieldName, value) => {
+        // Create updated column object
+        const updatedColumn = {...column, [fieldName]: value};
+        
+        // If length or diameter is updated, recalculate volume
+        let calculatedVolume = updatedColumn.volume;
+        if (fieldName === 'length' || fieldName === 'diameter') {
+            if (updatedColumn.length && updatedColumn.diameter) {
+                calculatedVolume = (Math.PI * Math.pow(updatedColumn.diameter/2, 2) * updatedColumn.length).toFixed(2);
+                updatedColumn.volume = calculatedVolume;
+            } else {
+                updatedColumn.volume = '';
+            }
+        }
+        
         // Update local state immediately for responsive UI
         const updatedColumns = columns.map(c => 
-            c.id === column.id ? {...c, [fieldName]: value} : c
+            c.id === column.id ? updatedColumn : c
         );
         setColumns(updatedColumns);
         
@@ -110,22 +151,22 @@ function ColumnsTab({ userData }) {
             };
             
             // Create a properly formatted object with all required fields
-            const updatedColumn = {
-                name: column.name,
-                barcode: column.barcode,
-                category: column.category,
-                type: column.type,
-                catalogNumber: column.catalogNumber,
-                webLink: column.webLink,
-                purchaseDate: column.purchaseDate,
-                cost: column.cost,
-                length: column.length,
-                diameter: column.diameter,
-                volume: column.volume,
-                voidVolume: column.voidVolume,
-                [fieldName]: value  // Override with the new value
+            const columnToUpdate = {
+                name: updatedColumn.name,
+                barcode: updatedColumn.barcode,
+                category: updatedColumn.category,
+                type: updatedColumn.type,
+                catalogNumber: updatedColumn.catalogNumber,
+                webLink: updatedColumn.webLink,
+                purchaseDate: updatedColumn.purchaseDate,
+                cost: updatedColumn.cost,
+                length: updatedColumn.length,
+                diameter: updatedColumn.diameter,
+                volume: updatedColumn.volume, // This will be the calculated volume if length or diameter changed
+                voidVolume: updatedColumn.voidVolume,
+                pdfFileId: updatedColumn.pdfFileId
             };
-            await axios.put(`/fms-api/columns/${column.id}`, updatedColumn, config);
+            await axios.put(`/fms-api/columns/${column.id}`, columnToUpdate, config);
         } catch (err) {
             console.error(`Error updating column:`, err);
             // If database update fails, we could revert the local state change
@@ -179,8 +220,11 @@ function ColumnsTab({ userData }) {
             cost: '',
             length: '',
             diameter: '',
-            volume: '',
+            volume: '', // Volume will be calculated automatically when length and diameter are provided
             voidVolume: '',
+            pdfFileId: null,
+            pdfFileName: '',
+            pdfFilePath: '',
             isNew: true, // Flag to indicate this is a new, unsaved row
             isEditing: true // Start in editing mode
         };
@@ -287,6 +331,7 @@ function ColumnsTab({ userData }) {
                             <th style={{...cellStyle, textAlign: 'left', fontWeight: 'bold' }}>Diameter (cm)</th>
                             <th style={{...cellStyle, textAlign: 'left', fontWeight: 'bold' }}>Volume (ml)</th>
                             <th style={{...cellStyle, textAlign: 'left', fontWeight: 'bold' }}>Void Volume (Vo) (ml)</th>
+                            <th style={{...cellStyle, textAlign: 'left', fontWeight: 'bold' }}>PDF File</th>
                             <th style={{ padding: '6px', textAlign: 'center', fontWeight: 'bold' }}>Actions</th>
                         </tr>
                     </thead>
@@ -575,6 +620,70 @@ function ColumnsTab({ userData }) {
                                         }}
                                     />
                                 </td>
+                                <td style={cellStyle}>
+                                    {column.isEditing ? (
+                                        <select
+                                            value={column.pdfFileId || ''}
+                                            onChange={(e) => {
+                                                const updatedColumns = columns.map(c => 
+                                                    c.id === column.id ? {
+                                                        ...c, 
+                                                        pdfFileId: e.target.value ? parseInt(e.target.value) : null,
+                                                        pdfFileName: e.target.value ? 
+                                                            pdfFiles.find(file => file.id === parseInt(e.target.value))?.original_name || '' : '',
+                                                        pdfFilePath: e.target.value ? 
+                                                            pdfFiles.find(file => file.id === parseInt(e.target.value))?.file_path || '' : ''
+                                                    } : c
+                                                );
+                                                setColumns(updatedColumns);
+                                                if (!column.isEditing) {
+                                                    updateColumnField(column, 'pdfFileId', e.target.value ? parseInt(e.target.value) : null);
+                                                }
+                                            }}
+                                            style={{
+                                                ...inputStyles.base, 
+                                                ...inputStyles.pdfFile,
+                                                backgroundColor: '#ffffff',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            <option value="">Select a PDF file</option>
+                                            {pdfFiles.map(file => (
+                                                <option key={file.id} value={file.id}>
+                                                    {file.original_name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    ) : (
+                                        column.pdfFileName ? (
+                                            <a 
+                                                href={column.pdfFilePath} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                style={{
+                                                    color: '#007bff',
+                                                    textDecoration: 'none',
+                                                    display: 'block',
+                                                    padding: '6px 8px',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    whiteSpace: 'nowrap'
+                                                }}
+                                            >
+                                                {column.pdfFileName}
+                                            </a>
+                                        ) : (
+                                            <span style={{
+                                                display: 'block',
+                                                padding: '6px 8px',
+                                                color: '#6c757d',
+                                                fontStyle: 'italic'
+                                            }}>
+                                                No PDF file
+                                            </span>
+                                        )
+                                    )}
+                                </td>
                                 <td style={{ padding: '6px', textAlign: 'center' }}>
                                     <div style={{ display: 'flex', justifyContent: 'center', gap: '5px' }}>
                                         {column.isEditing ? (
@@ -615,7 +724,8 @@ function ColumnsTab({ userData }) {
                                                                     length: column.length,
                                                                     diameter: column.diameter,
                                                                     volume: calculatedVolume, // Use calculated volume
-                                                                    voidVolume: column.voidVolume
+                                                                    voidVolume: column.voidVolume,
+                                                                    pdfFileId: column.pdfFileId
                                                                 }, config);
                                                                 
                                                                 // Replace the temporary column with the one from the server
@@ -628,6 +738,11 @@ function ColumnsTab({ userData }) {
                                                             }
                                                         } else {
                                                             // For existing columns, update in database
+                                                            // Calculate volume from length and diameter
+                                                            const calculatedVolume = column.length && column.diameter 
+                                                                ? (Math.PI * Math.pow(column.diameter/2, 2) * column.length).toFixed(2)
+                                                                : '';
+                                                                
                                                             await axios.put(`/fms-api/columns/${column.id}`, {
                                                                 name: column.name,
                                                                 barcode: column.barcode,
@@ -639,8 +754,9 @@ function ColumnsTab({ userData }) {
                                                                 cost: column.cost,
                                                                 length: column.length,
                                                                 diameter: column.diameter,
-                                                                volume: column.volume,
-                                                                voidVolume: column.voidVolume
+                                                                volume: calculatedVolume, // Use calculated volume
+                                                                voidVolume: column.voidVolume,
+                                                                pdfFileId: column.pdfFileId
                                                             }, config);
                                                             
                                                             // Update local state to exit editing mode

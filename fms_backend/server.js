@@ -2273,30 +2273,24 @@ app.get('/fms-api/columns', authenticateToken, async (req, res) => {
 
         const columns = await conn.query(`
     SELECT 
-        id, name, barcode, category, type,
-        catalog_number as catalogNumber,
-        web_link as webLink,
-        purchase_date as purchaseDate,
-        cost, length, diameter, volume,
-        void_volume as voidVolume,
-        created_by, created_at, updated_by, updated_at
-    FROM columns
-    ORDER BY name
+        c.id, c.name, c.barcode, c.category, c.type,
+        c.catalog_number as catalogNumber,
+        c.web_link as webLink,
+        DATE_FORMAT(c.purchase_date, '%Y-%m-%d') as purchaseDate,
+        c.cost, c.length, c.diameter, c.volume,
+        c.void_volume as voidVolume,
+        c.pdf_file_id as pdfFileId,
+        f.original_name as pdfFileName,
+        f.file_path as pdfFilePath,
+        c.created_by, c.created_at, c.updated_by, c.updated_at
+    FROM columns c
+    LEFT JOIN file_uploads f ON c.pdf_file_id = f.id
+    ORDER BY c.name
 `);
         
-        // Transform snake_case column names to camelCase for frontend
-        const transformedColumns = columns.map(column => {
-            return {
-                ...column,
-                // Convert specific snake_case fields to camelCase
-                catalogNumber: column.catalog_number,
-                webLink: column.web_link,
-                purchaseDate: column.purchase_date,
-                voidVolume: column.void_volume
-            };
-        });
-        
-        res.json(transformedColumns);
+        // The SQL query already aliases the column names to camelCase
+        // No need for additional transformation
+        res.json(columns);
     } catch (err) {
         console.error('Error fetching columns:', err);
         
@@ -2323,7 +2317,7 @@ app.post('/fms-api/columns', authenticateToken, async (req, res) => {
         conn = await pool.getConnection();
         const {
             name, barcode, category, type, catalogNumber, webLink, purchaseDate,
-            cost, length, diameter, volume, voidVolume
+            cost, length, diameter, volume, voidVolume, pdfFileId
         } = req.body;
 
         // Format dates to YYYY-MM-DD format for MySQL DATE columns
@@ -2343,27 +2337,33 @@ app.post('/fms-api/columns', authenticateToken, async (req, res) => {
         const result = await conn.query(`
             INSERT INTO columns (
                 name, barcode, category, type, catalog_number, web_link, purchase_date,
-                cost, length, diameter, volume, void_volume,
+                cost, length, diameter, volume, void_volume, pdf_file_id,
                 created_by, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
         `, [
             name, barcode, category, type, catalogNumber, webLink, formattedPurchaseDate,
-            formattedCost, length, diameter, volume, voidVolume,
+            formattedCost, length, diameter, volume, voidVolume, pdfFileId || null,
             req.user.id
         ]);
 
-        const newColumn = await conn.query('SELECT * FROM columns WHERE id = ?', [result.insertId]);
+        const newColumn = await conn.query(`
+            SELECT 
+                c.id, c.name, c.barcode, c.category, c.type,
+                c.catalog_number as catalogNumber,
+                c.web_link as webLink,
+                DATE_FORMAT(c.purchase_date, '%Y-%m-%d') as purchaseDate,
+                c.cost, c.length, c.diameter, c.volume,
+                c.void_volume as voidVolume,
+                c.pdf_file_id as pdfFileId,
+                f.original_name as pdfFileName,
+                f.file_path as pdfFilePath,
+                c.created_by, c.created_at, c.updated_by, c.updated_at
+            FROM columns c
+            LEFT JOIN file_uploads f ON c.pdf_file_id = f.id
+            WHERE c.id = ?
+        `, [result.insertId]);
         
-        // Transform snake_case column names to camelCase for frontend
-        const transformedColumn = {
-            ...newColumn[0],
-            catalogNumber: newColumn[0].catalog_number,
-            webLink: newColumn[0].web_link,
-            purchaseDate: newColumn[0].purchase_date,
-            voidVolume: newColumn[0].void_volume
-        };
-        
-        res.status(201).json(transformedColumn);
+        res.status(201).json(newColumn[0]);
     } catch (err) {
         console.error('Error creating column:', err);
         
@@ -2391,7 +2391,7 @@ app.put('/fms-api/columns/:id', authenticateToken, async (req, res) => {
         const columnId = req.params.id;
         const {
             name, barcode, category, type, catalogNumber, webLink, purchaseDate,
-            cost, length, diameter, volume, voidVolume
+            cost, length, diameter, volume, voidVolume, pdfFileId
         } = req.body;
 
         // Format dates to YYYY-MM-DD format for MySQL DATE columns
@@ -2412,15 +2412,31 @@ app.put('/fms-api/columns/:id', authenticateToken, async (req, res) => {
             UPDATE columns SET
                 name = ?, barcode = ?, category = ?, type = ?, catalog_number = ?, web_link = ?,
                 purchase_date = ?, cost = ?, length = ?, diameter = ?, volume = ?,
-                void_volume = ?, updated_by = ?, updated_at = NOW()
+                void_volume = ?, pdf_file_id = ?, updated_by = ?, updated_at = NOW()
             WHERE id = ?
         `, [
             name, barcode, category, type, catalogNumber, webLink, formattedPurchaseDate,
-            formattedCost, length, diameter, volume, voidVolume,
+            formattedCost, length, diameter, volume, voidVolume, pdfFileId || null,
             req.user.id, columnId
         ]);
 
-        const updatedColumn = await conn.query('SELECT * FROM columns WHERE id = ?', [columnId]);
+        const updatedColumn = await conn.query(`
+            SELECT 
+                c.id, c.name, c.barcode, c.category, c.type,
+                c.catalog_number as catalogNumber,
+                c.web_link as webLink,
+                DATE_FORMAT(c.purchase_date, '%Y-%m-%d') as purchaseDate,
+                c.cost, c.length, c.diameter, c.volume,
+                c.void_volume as voidVolume,
+                c.pdf_file_id as pdfFileId,
+                f.original_name as pdfFileName,
+                f.file_path as pdfFilePath,
+                c.created_by, c.created_at, c.updated_by, c.updated_at
+            FROM columns c
+            LEFT JOIN file_uploads f ON c.pdf_file_id = f.id
+            WHERE c.id = ?
+        `, [columnId]);
+        
         res.json(updatedColumn[0]);
     } catch (err) {
         console.error('Error updating column:', err);
