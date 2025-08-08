@@ -5,6 +5,7 @@ import TrainingPage from './TrainingPage.js';
 import EquipmentTab from './EquipmentTab.js';
 import BookingTab from './BookingTab.js';
 import ProjectTab from './ProjectTab.js';
+import QualityManagementTab from './QualityManagementTab.js';
 import ShipmentsTab from './ShipmentsTab.js';
 import CommercialTab from './CommercialTab.js';
 import GrantsTab from './GrantsTab.js';
@@ -19,7 +20,6 @@ import EmergencyProcedures from './EmergencyProcedures.js';
 import LocalRules from './LocalRules.js';
 import WasteDisposalProcedures from './WasteDisposalProcedures.js';
 import ChemicalsTab from './ChemicalsTab.js';
-import ConsumablesTab from './ConsumablesTab.js';
 import StrainsTab from './StrainsTab.js';
 import ProteinsTab from './ProteinsTab.js';
 import LigandsTab from './LigandsTab.js';
@@ -32,6 +32,7 @@ import Feedback from './Feedback.js';
 import ReportsStats from './ReportsStats.js';
 import PreferencesTab from './PreferencesTab.js';
 import FileUploadTab from './FileUploadTab.js';
+import ColumnsTab from './ColumnsTab.js';
 
 function Dashboard({ userData, onLogout }) {
     const [activeTab, setActiveTab] = useState(() => {
@@ -57,6 +58,9 @@ function Dashboard({ userData, onLogout }) {
     });
     const [activeSetupTab, setActiveSetupTab] = useState(() => {
         return localStorage.getItem('dashboardActiveSetupTab') || 'preferences';
+    });
+    const [activeConsumablesSubTab, setActiveConsumablesSubTab] = useState(() => {
+        return localStorage.getItem('dashboardActiveConsumablesSubTab') || 'columns';
     });
     const [facilities, setFacilities] = useState([]);
     const [equipment, setEquipment] = useState([]);
@@ -157,6 +161,10 @@ function Dashboard({ userData, onLogout }) {
     useEffect(() => {
         localStorage.setItem('dashboardActiveSetupTab', activeSetupTab);
     }, [activeSetupTab]);
+    
+    useEffect(() => {
+        localStorage.setItem('dashboardActiveConsumablesSubTab', activeConsumablesSubTab);
+    }, [activeConsumablesSubTab]);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
@@ -679,6 +687,19 @@ function Dashboard({ userData, onLogout }) {
                                         Projects
                                     </div>
                                     <div
+                                        onClick={() => setActiveResearchTab('quality-management')}
+                                        style={{
+                                            padding: '10px 20px',
+                                            cursor: 'pointer',
+                                            backgroundColor: activeResearchTab === 'quality-management' ? '#ffffff' : 'transparent',
+                                            borderBottom: activeResearchTab === 'quality-management' ? '2px solid #007bff' : 'none',
+                                            fontWeight: activeResearchTab === 'quality-management' ? 'bold' : 'normal',
+                                            border: activeResearchTab === 'quality-management' ? '1px solid #dee2e6' : 'none'
+                                        }}
+                                    >
+                                        Quality Management
+                                    </div>
+                                    <div
                                         onClick={() => setActiveResearchTab('shipments')}
                                         style={{
                                             padding: '10px 20px',
@@ -721,6 +742,9 @@ function Dashboard({ userData, onLogout }) {
                                 <div style={{ backgroundColor: '#ffffff', padding: '20px', border: '1px solid #dee2e6', borderRadius: '0 0 4px 4px' }}>
                                     {activeResearchTab === 'projects' && (
                                         <ProjectTab userData={userData} />
+                                    )}
+                                    {activeResearchTab === 'quality-management' && (
+                                        <QualityManagementTab userData={userData} />
                                     )}
                                     {activeResearchTab === 'shipments' && (
                                         <ShipmentsTab userData={userData} />
@@ -909,7 +933,65 @@ function Dashboard({ userData, onLogout }) {
                                         <ChemicalsTab userData={userData} />
                                     )}
                                     {activeInventoryTab === 'consumables' && (
-                                        <ConsumablesTab userData={userData} />
+                                        <div>
+                                            <h3>Consumables Inventory</h3>
+                                            <div style={{ display: 'flex', borderBottom: '1px solid #dee2e6', marginBottom: '20px', backgroundColor: '#f8f9fa' }}>
+                                                <div
+                                                    onClick={() => setActiveConsumablesSubTab('columns')}
+                                                    style={{
+                                                        padding: '10px 20px',
+                                                        cursor: 'pointer',
+                                                        backgroundColor: activeConsumablesSubTab === 'columns' ? '#ffffff' : 'transparent',
+                                                        borderBottom: activeConsumablesSubTab === 'columns' ? '2px solid #007bff' : 'none',
+                                                        fontWeight: activeConsumablesSubTab === 'columns' ? 'bold' : 'normal',
+                                                        border: activeConsumablesSubTab === 'columns' ? '1px solid #dee2e6' : 'none'
+                                                    }}
+                                                >
+                                                    Columns
+                                                </div>
+                                                <div
+                                                    onClick={() => setActiveConsumablesSubTab('general')}
+                                                    style={{
+                                                        padding: '10px 20px',
+                                                        cursor: 'pointer',
+                                                        backgroundColor: activeConsumablesSubTab === 'general' ? '#ffffff' : 'transparent',
+                                                        borderBottom: activeConsumablesSubTab === 'general' ? '2px solid #007bff' : 'none',
+                                                        fontWeight: activeConsumablesSubTab === 'general' ? 'bold' : 'normal',
+                                                        border: activeConsumablesSubTab === 'general' ? '1px solid #dee2e6' : 'none'
+                                                    }}
+                                                >
+                                                    General
+                                                </div>
+                                            </div>
+                                            <div style={{ backgroundColor: '#ffffff', padding: '20px', border: '1px solid #dee2e6', borderRadius: '0 0 4px 4px' }}>
+                                                {activeConsumablesSubTab === 'columns' && (
+                                                    <ColumnsTab userData={userData} />
+                                                )}
+                                                {activeConsumablesSubTab === 'general' && (
+                                                    <div>
+                                                        <p>Laboratory consumables and disposable items management.</p>
+                                                        <div style={{ 
+                                                            backgroundColor: '#fff3e0', 
+                                                            padding: '15px', 
+                                                            borderRadius: '4px',
+                                                            border: '1px solid #ffcc02'
+                                                        }}>
+                                                            <h4>Features to be implemented:</h4>
+                                                            <ul>
+                                                                <li>Consumables stock tracking</li>
+                                                                <li>Usage monitoring and analytics</li>
+                                                                <li>Automated reorder thresholds</li>
+                                                                <li>Supplier management</li>
+                                                                <li>Cost tracking and budgeting</li>
+                                                                <li>Quality control and batch tracking</li>
+                                                                <li>Storage location mapping</li>
+                                                                <li>Procurement workflow integration</li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
                                     )}
                                     {activeInventoryTab === 'strains' && (
                                         <StrainsTab userData={userData} />

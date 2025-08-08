@@ -1,14 +1,7 @@
 import React, { useState, useMemo } from 'react';
 
 const MultiTabSpreadsheet = () => {
-    const [activeTab, setActiveTab] = useState(() => {
-        return parseInt(localStorage.getItem('costingModelActiveSpreadsheetTab')) || 0;
-    });
-
-    // Save active spreadsheet tab to localStorage when it changes
-    React.useEffect(() => {
-        localStorage.setItem('costingModelActiveSpreadsheetTab', activeTab.toString());
-    }, [activeTab]);
+    const [activeTab, setActiveTab] = useState(0);
 
     // All editable input data
     const [inputs, setInputs] = useState({
@@ -820,23 +813,8 @@ const FecTypesTable = () => {
 };
 
 function CostingModelTab({ userData }) {
-    const [activeCostingTab, setActiveCostingTab] = useState(() => {
-        return localStorage.getItem('costingModelActiveFinancialYear') || '2025-2026';
-    });
-    const [financialYears, setFinancialYears] = useState(() => {
-        const savedYears = localStorage.getItem('costingModelFinancialYears');
-        return savedYears ? JSON.parse(savedYears) : ['2025-2026'];
-    });
-
-    // Save active financial year tab to localStorage when it changes
-    React.useEffect(() => {
-        localStorage.setItem('costingModelActiveFinancialYear', activeCostingTab);
-    }, [activeCostingTab]);
-
-    // Save financial years to localStorage when they change
-    React.useEffect(() => {
-        localStorage.setItem('costingModelFinancialYears', JSON.stringify(financialYears));
-    }, [financialYears]);
+    const [activeCostingTab, setActiveCostingTab] = useState('2025-2026');
+    const [financialYears, setFinancialYears] = useState(['2025-2026']);
 
     const addNewFinancialYear = () => {
         // Get the latest year from the last tab
@@ -861,7 +839,6 @@ function CostingModelTab({ userData }) {
                             padding: '10px 20px',
                             cursor: 'pointer',
                             backgroundColor: activeCostingTab === year ? '#ffffff' : 'transparent',
-                            borderBottom: activeCostingTab === year ? '2px solid #007bff' : 'none',
                             fontWeight: activeCostingTab === year ? 'bold' : 'normal',
                             border: activeCostingTab === year ? '1px solid #dee2e6' : 'none',
                             borderBottom: activeCostingTab === year ? 'none' : '1px solid #dee2e6'

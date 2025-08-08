@@ -1,0 +1,206 @@
+.expenditure-container {
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.table-header h2 {
+  margin: 0;
+  color: #2c3e50;
+}
+
+.summary-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.summary-stats span {
+  font-weight: 500;
+  color: #34495e;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.expenditure-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.expenditure-table th, 
+.expenditure-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.expenditure-table thead th {
+  background-color: #f5f7fa;
+  color: #2c3e50;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.expenditure-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sortable:hover {
+  background-color: #e9ecef;
+}
+
+.description-cell {
+  max-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.currency-cell {
+  text-align: right;
+  font-family: monospace;
+}
+
+.number-cell {
+  text-align: center;
+}
+
+.cost-highlight {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.type-cell {
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.application-cell {
+  text-align: center;
+}
+
+.app-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.app-badge.mx {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.app-badge.cryo-em {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.date-cell {
+  white-space: nowrap;
+}
+
+.req-cell, .po-cell {
+  font-family: monospace;
+  font-size: 13px;
+}
+
+.reconciled-cell {
+  text-align: center;
+}
+
+.reconcile-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.add-item-button {
+  margin-bottom: 20px;
+  padding: 10px 16px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.add-item-button:hover {
+  background-color: #45a049;
+}
+
+.add-item-button:active {
+  background-color: #3d8b40;
+}
+
+/* Company Table Styles */
+.company-section {
+  margin-top: 40px;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 20px;
+}
+
+.company-table-container h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+.company-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.company-table th, 
+.company-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.company-table thead th {
+  background-color: #f5f7fa;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.company-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.company-table a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+.company-table a:hover {
+  text-decoration: underline;
+  color: #2980b9;
+}
